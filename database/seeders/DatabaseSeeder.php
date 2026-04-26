@@ -3,23 +3,35 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $this->call(RolesAndPermissionsSeeder::class);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        $users = [
+            ['role' => 'admin',   'name' => 'مدير النظام',    'email' => 'admin@aqari.sa',   'phone' => '0500000001'],
+            ['role' => 'manager', 'name' => 'مدير العقارات',  'email' => 'manager@aqari.sa', 'phone' => '0500000002'],
+            ['role' => 'staff',   'name' => 'موظف الصيانة',   'email' => 'staff@aqari.sa',   'phone' => '0500000003'],
+            ['role' => 'tenant',  'name' => 'مستأجر تجريبي', 'email' => 'tenant@aqari.sa',  'phone' => '0500000004'],
+        ];
+
+        foreach ($users as $data) {
+            $user = User::firstOrCreate(
+                ['email' => $data['email']],
+                [
+                    'name'               => $data['name'],
+                    'password'           => bcrypt('password'),
+                    'phone'              => $data['phone'],
+                    'preferred_language' => 'ar',
+                    'email_verified_at'  => now(),
+                ]
+            );
+            if (! $user->hasRole($data['role'])) {
+                $user->assignRole($data['role']);
+            }
+        }
     }
 }
