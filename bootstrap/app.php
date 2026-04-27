@@ -11,7 +11,20 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Redirect unauthenticated users → login; authenticated users away from guest pages
+        $middleware->redirectTo(guests: '/login', users: '/dashboard');
+
+        // Exclude Moyasar webhook from CSRF verification
+        $middleware->validateCsrfTokens(except: [
+            'webhooks/moyasar',
+        ]);
+
+        // Register spatie/laravel-permission middleware aliases
+        $middleware->alias([
+            'role'               => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission'         => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
