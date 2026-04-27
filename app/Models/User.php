@@ -2,48 +2,38 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+use Spatie\Activitylog\Support\LogOptions;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, HasRoles, LogsActivity, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    protected $fillable = ['name','email','password','phone','avatar','preferred_language'];
+    protected $hidden   = ['password','remember_token'];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return ['email_verified_at' => 'datetime', 'password' => 'hashed'];
     }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()->logFillable()->logOnlyDirty();
+    }
+
+    public function properties(): HasMany { return $this->hasMany(Property::class, 'owner_id'); }
+    public function payments(): HasMany { return $this->hasMany(Payment::class, 'paid_by'); }
+    public function notifications(): HasMany { return $this->hasMany(Notification::class); }
+    public function maintenanceAssignments(): HasMany { return $this->hasMany(MaintenanceRequest::class, 'assigned_to'); }
+    public function leaseRenewals(): HasMany { return $this->hasMany(LeaseRenewal::class, 'renewed_by'); }
+    public function tenantProfile(): \Illuminate\Database\Eloquent\Relations\HasOne { return $this->hasOne(Tenant::class); }
 }
