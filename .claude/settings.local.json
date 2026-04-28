@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(composer require *)",
+      "Bash(php --version)",
+      "Bash(php -m)",
+      "Bash(php artisan *)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(php -l app/Http/Controllers/InvoiceController.php app/Http/Controllers/LeaseController.php app/Http/Controllers/MaintenanceController.php app/Http/Controllers/TenantController.php app/Services/LeaseService.php app/Services/AiPredictionService.php app/Services/MoyasarService.php)"
+    ]
+  }
+}
