@@ -41,5 +41,10 @@
     <button type="submit" class="btn-primary w-full justify-center py-3">
         تسجيل الدخول
     </button>
+
+    <p class="text-sm text-gray-600 text-center">
+        ليس لديك حساب؟
+        <a href="{{ route('register') }}" class="text-indigo-600 hover:text-indigo-700 font-medium transition">إنشاء حساب جديد</a>
+    </p>
 </form>
 @endsection
