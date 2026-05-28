@@ -80,5 +80,12 @@ class RoleAndPermissionSeeder extends Seeder
             'maintenance.view', 'maintenance.create',
             'notifications.view', 'notifications.mark-read',
         ]);
+
+        // ── user (normal registered user / property owner) ────────────────────
+        $user = Role::firstOrCreate(['name' => 'user']);
+        $user->syncPermissions([
+            'properties.view',
+            'leases.view',
+        ]);
     }
 }

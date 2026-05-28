@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreLeaseRequest;
 use App\Http\Requests\UpdateLeaseRequest;
 use App\Models\Lease;
+use App\Models\Property;
 use App\Models\Tenant;
 use App\Models\Unit;
 use App\Services\LeaseService;
@@ -20,6 +21,9 @@ class LeaseController extends Controller
     public function index(Request $request): View
     {
         $leases = Lease::query()
+            ->when(auth()->user()->hasRole('user'), fn ($q) =>
+                $q->whereHas('unit.property', fn ($p) => $p->where('owner_id', auth()->id()))
+            )
             ->when($request->search, fn ($q) =>
                 $q->whereHas('tenant', fn ($t) => $t->where('name', 'like', "%{$request->search}%"))
                   ->orWhereHas('unit', fn ($u) => $u->where('unit_number', 'like', "%{$request->search}%"))
@@ -55,6 +59,13 @@ class LeaseController extends Controller
     public function show(Lease $lease): View
     {
         $lease->load(['unit.property', 'tenant', 'renewals', 'invoices' => fn ($q) => $q->latest()]);
+
+        if (auth()->user()->hasRole('user')) {
+            $userPropertyIds = Property::where('owner_id', auth()->id())->pluck('id');
+            if (! $userPropertyIds->contains($lease->unit->property_id)) {
+                abort(403);
+            }
+        }
 
         return view('leases.show', compact('lease'));
     }

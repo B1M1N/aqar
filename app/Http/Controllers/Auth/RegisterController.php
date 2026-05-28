@@ -33,13 +33,15 @@ class RegisterController extends Controller
             'password.confirmed' => 'تأكيد كلمة المرور غير متطابق.',
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'phone' => $validated['phone'] ?? null,
             'password' => Hash::make($validated['password']),
             'preferred_language' => 'ar',
         ]);
+
+        $user->assignRole('user');
 
         return redirect()->route('login')->with('status', 'تم إنشاء الحساب بنجاح. يمكنك الآن تسجيل الدخول.');
     }

@@ -6,12 +6,17 @@ use App\Models\Invoice;
 use App\Models\Lease;
 use App\Models\Property;
 use App\Models\Unit;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function index(): View
+    public function index(): View|RedirectResponse
     {
+        if (auth()->user()->hasRole('user')) {
+            return redirect()->route('properties.index');
+        }
+
         $totalProperties  = Property::count();
         $totalUnits       = Unit::count();
         $occupiedUnits    = Unit::occupied()->count();

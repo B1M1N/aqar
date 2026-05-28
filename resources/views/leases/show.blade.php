@@ -22,9 +22,13 @@ $invLabel    = ['paid' => 'مدفوع', 'pending' => 'غير مدفوع', 'late'
             <h2 class="text-xl font-bold text-gray-900">عقد #{{ $lease->id }}</h2>
             <p class="text-sm text-gray-500 mt-0.5">
                 {{ $lease->tenant->name }} ·
+                @can('units.view')
                 <a href="{{ route('units.show', $lease->unit) }}" class="text-indigo-600 hover:text-indigo-700">
                     {{ $lease->unit->unit_number }}
                 </a>
+                @else
+                <span>{{ $lease->unit->unit_number }}</span>
+                @endcan
                 · {{ $lease->unit->property->name }}
             </p>
         </div>
@@ -133,9 +137,13 @@ $invLabel    = ['paid' => 'مدفوع', 'pending' => 'غير مدفوع', 'late'
                 <div class="card p-5 space-y-3">
                     <p class="text-xs text-gray-400 uppercase tracking-wide font-medium">الوحدة</p>
                     <p class="font-semibold text-gray-800">
+                        @can('units.view')
                         <a href="{{ route('units.show', $lease->unit) }}" class="text-indigo-600 hover:text-indigo-700">
                             {{ $lease->unit->unit_number }}
                         </a>
+                        @else
+                        {{ $lease->unit->unit_number }}
+                        @endcan
                     </p>
                     <p class="text-sm text-gray-500">{{ $lease->unit->property->name }}</p>
                 </div>

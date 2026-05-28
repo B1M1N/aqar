@@ -43,6 +43,14 @@ class AdminUserSeeder extends Seeder
                 'preferred_language' => 'ar',
                 'role'               => 'tenant',
             ],
+            [
+                'name'               => 'مالك عقارات',
+                'email'              => 'user@aqari.com',
+                'password'           => Hash::make('password'),
+                'phone'              => '0500000005',
+                'preferred_language' => 'ar',
+                'role'               => 'user',
+            ],
         ];
 
         foreach ($users as $data) {
