@@ -8,26 +8,28 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('units', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('property_id')->constrained('properties')->cascadeOnDelete();
-            $table->string('unit_number', 20);
-            $table->enum('type', ['apartment', 'studio', 'room', 'floor', 'shop', 'suite']);
-            $table->unsignedSmallInteger('floor')->default(1);
-            $table->decimal('area', 8, 2)->nullable();
-            $table->unsignedTinyInteger('bedrooms')->default(0);
-            $table->unsignedTinyInteger('bathrooms')->default(0);
-            $table->decimal('rent_price', 10, 2);
-            $table->enum('rent_period', ['monthly', 'quarterly', 'yearly'])->default('monthly');
-            $table->enum('status', ['available', 'occupied', 'reserved', 'maintenance'])->default('available');
-            $table->json('features')->nullable();
-            $table->json('images')->nullable();
-            $table->text('notes')->nullable();
-            $table->softDeletes();
-            $table->timestamps();
+        if (! Schema::hasTable('units')) {
+            Schema::create('units', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('property_id')->constrained('properties')->cascadeOnDelete();
+                $table->string('unit_number', 20);
+                $table->enum('type', ['apartment', 'studio', 'room', 'floor', 'shop', 'suite']);
+                $table->unsignedSmallInteger('floor')->default(1);
+                $table->decimal('area', 8, 2)->nullable();
+                $table->unsignedTinyInteger('bedrooms')->default(0);
+                $table->unsignedTinyInteger('bathrooms')->default(0);
+                $table->decimal('rent_price', 10, 2);
+                $table->enum('rent_period', ['monthly', 'quarterly', 'yearly'])->default('monthly');
+                $table->enum('status', ['available', 'occupied', 'reserved', 'maintenance'])->default('available');
+                $table->json('features')->nullable();
+                $table->json('images')->nullable();
+                $table->text('notes')->nullable();
+                $table->softDeletes();
+                $table->timestamps();
 
-            $table->unique(['property_id', 'unit_number']);
-        });
+                $table->unique(['property_id', 'unit_number']);
+            });
+        }
     }
 
     public function down(): void
