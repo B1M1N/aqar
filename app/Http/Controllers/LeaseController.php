@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreLeaseRequest;
 use App\Http\Requests\UpdateLeaseRequest;
 use App\Models\Lease;
-use App\Models\Property;
 use App\Models\Tenant;
 use App\Models\Unit;
 use App\Services\LeaseService;
@@ -20,9 +19,16 @@ class LeaseController extends Controller
 
     public function index(Request $request): View
     {
+        // [role:user] scope to leases belonging to the user's linked tenant record
+        $tenantId = null;
+        if (auth()->user()->hasRole('user')) {
+            $tenantId = auth()->user()->tenant?->id;
+        }
+
         $leases = Lease::query()
-            ->when(auth()->user()->hasRole('user'), fn ($q) =>
-                $q->whereHas('unit.property', fn ($p) => $p->where('owner_id', auth()->id()))
+            ->when($tenantId,   fn ($q) => $q->where('tenant_id', $tenantId))
+            ->when($tenantId === null && auth()->user()->hasRole('user'), fn ($q) =>
+                $q->whereRaw('0 = 1')
             )
             ->when($request->search, fn ($q) =>
                 $q->whereHas('tenant', fn ($t) => $t->where('name', 'like', "%{$request->search}%"))
@@ -60,10 +66,11 @@ class LeaseController extends Controller
     {
         $lease->load(['unit.property', 'tenant', 'renewals', 'invoices' => fn ($q) => $q->latest()]);
 
+        // [role:user] allow access only to their own lease via linked tenant record
         if (auth()->user()->hasRole('user')) {
-            $userPropertyIds = Property::where('owner_id', auth()->id())->pluck('id');
-            if (! $userPropertyIds->contains($lease->unit->property_id)) {
-                abort(403);
+            $tenantId = auth()->user()->tenant?->id;
+            if (! $tenantId || $lease->tenant_id !== $tenantId) {
+                return redirect()->route('leases.index');
             }
         }
 

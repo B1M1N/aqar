@@ -20,6 +20,10 @@ class RoleMiddleware
         }
 
         if (! empty($roles) && ! $request->user()->hasAnyRole($roles)) {
+            // [role:user] redirect to their allowed landing page instead of hard 403
+            if ($request->user()->hasRole('user')) {
+                return redirect()->route('leases.index');
+            }
             abort(403, 'Unauthorized.');
         }
 

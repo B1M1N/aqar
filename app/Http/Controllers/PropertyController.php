@@ -15,10 +15,19 @@ class PropertyController extends Controller
 {
     public function index(Request $request): View
     {
-        $isUser = auth()->user()->hasRole('user');
+        // [role:user] scope to properties the user is renting via their tenant record
+        $tenantId = null;
+        if (auth()->user()->hasRole('user')) {
+            $tenantId = auth()->user()->tenant?->id;
+        }
 
         $properties = Property::query()
-            ->when($isUser, fn ($q) => $q->where('owner_id', auth()->id()))
+            ->when($tenantId, fn ($q) =>
+                $q->whereHas('units.leases', fn ($l) => $l->where('tenant_id', $tenantId))
+            )
+            ->when($tenantId === null && auth()->user()->hasRole('user'), fn ($q) =>
+                $q->whereRaw('0 = 1')
+            )
             ->when($request->search, fn ($q) =>
                 $q->where('name', 'like', "%{$request->search}%")
                   ->orWhere('city', 'like', "%{$request->search}%")
@@ -37,9 +46,7 @@ class PropertyController extends Controller
             ->paginate(12)
             ->withQueryString();
 
-        $cities = $isUser
-            ? Property::where('owner_id', auth()->id())->distinct()->pluck('city')->sort()->values()
-            : Property::distinct()->pluck('city')->sort()->values();
+        $cities = Property::distinct()->pluck('city')->sort()->values();
 
         return view('properties.index', compact('properties', 'cities'));
     }
@@ -64,8 +71,15 @@ class PropertyController extends Controller
 
     public function show(Property $property): View
     {
-        if (auth()->user()->hasRole('user') && $property->owner_id !== auth()->id()) {
-            abort(403);
+        // [role:user] allow access only to properties they are renting
+        if (auth()->user()->hasRole('user')) {
+            $tenantId = auth()->user()->tenant?->id;
+            $hasAccess = $tenantId && $property->units()
+                ->whereHas('leases', fn ($q) => $q->where('tenant_id', $tenantId))
+                ->exists();
+            if (! $hasAccess) {
+                return redirect()->route('leases.index');
+            }
         }
 
         $property->load(['owner', 'units.activeLease.tenant']);

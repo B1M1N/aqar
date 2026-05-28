@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -63,6 +64,20 @@ class AdminUserSeeder extends Seeder
             );
 
             $user->syncRoles([$role]);
+        }
+
+        // [role:user] create a linked Tenant record for the test user account
+        $testUser = User::where('email', 'user@aqari.com')->first();
+        if ($testUser) {
+            Tenant::updateOrCreate(
+                ['national_id' => 'TEST-00005'],
+                [
+                    'user_id' => $testUser->id,
+                    'name'    => $testUser->name,
+                    'phone'   => $testUser->phone,
+                    'email'   => $testUser->email,
+                ]
+            );
         }
     }
 }
