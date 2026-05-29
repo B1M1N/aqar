@@ -10,7 +10,7 @@
 $statusClass = ['paid' => 'status-paid', 'pending' => 'status-pending', 'late' => 'status-late', 'draft' => 'status-draft', 'cancelled' => 'status-cancelled'];
 $statusLabel = ['paid' => 'مدفوع', 'pending' => 'غير مدفوع', 'late' => 'متأخر', 'draft' => 'مسودة', 'cancelled' => 'ملغى'];
 $typeLabel   = ['rent' => 'إيجار', 'maintenance' => 'صيانة', 'utility' => 'خدمات', 'other' => 'أخرى'];
-$methodLabel = ['cash' => 'نقدًا', 'bank_transfer' => 'تحويل بنكي', 'cheque' => 'شيك', 'online' => 'إلكتروني'];
+$methodLabel = ['cash' => 'نقدًا', 'bank_transfer' => 'تحويل بنكي', 'check' => 'شيك', 'moyasar' => 'إلكتروني'];
 $st          = $invoice->is_late ? 'late' : $invoice->status;
 @endphp
 
@@ -173,7 +173,7 @@ $st          = $invoice->is_late ? 'late' : $invoice->status;
                     <select name="method" class="form-input" required>
                         <option value="cash">نقدًا</option>
                         <option value="bank_transfer">تحويل بنكي</option>
-                        <option value="cheque">شيك</option>
+                        <option value="check">شيك</option>
                     </select>
                 </div>
                 <div>

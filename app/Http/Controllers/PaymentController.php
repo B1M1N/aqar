@@ -16,7 +16,7 @@ class PaymentController extends Controller
         $data = $request->validate([
             'invoice_id'     => ['required', 'exists:invoices,id'],
             'amount'         => ['required', 'numeric', 'min:0'],
-            'method'         => ['required', 'in:cash,bank_transfer,cheque,online'],
+            'method'         => ['required', 'in:cash,bank_transfer,moyasar,check'],
             'transaction_id' => ['nullable', 'string', 'max:100'],
             'reference'      => ['nullable', 'string', 'max:200'],
         ]);
