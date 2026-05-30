@@ -44,10 +44,12 @@ Route::middleware('auth')->group(function () {
     Route::post('notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.markRead');
 
     // ── Admin + Manager ───────────────────────────────────────────────────
+    // Must be registered BEFORE the wildcard {property}/{lease} show routes
+    // so that /properties/create and /leases/create are matched correctly.
     Route::middleware('role:admin|manager')->group(function () {
 
-        // Properties
-        Route::resource('properties', PropertyController::class);
+        // Properties (write operations only; index + show defined below)
+        Route::resource('properties', PropertyController::class)->except(['index', 'show']);
 
         // Units
         Route::resource('units', UnitController::class);
@@ -55,8 +57,8 @@ Route::middleware('auth')->group(function () {
         // Tenants
         Route::resource('tenants', TenantController::class);
 
-        // Leases
-        Route::resource('leases', LeaseController::class);
+        // Leases (write operations only; index + show defined below)
+        Route::resource('leases', LeaseController::class)->except(['index', 'show']);
         Route::post('leases/{lease}/renew',    [LeaseController::class, 'renew'])->name('leases.renew');
         Route::post('leases/{lease}/terminate',[LeaseController::class, 'terminate'])->name('leases.terminate');
         Route::get('leases/{lease}/pdf',       [LeaseController::class, 'generatePdf'])->name('leases.pdf');
@@ -73,6 +75,16 @@ Route::middleware('auth')->group(function () {
         // Analytics & AI (admin + manager)
         Route::get('analytics',   [AnalyticsController::class,   'index'])->name('analytics.index');
         Route::get('ai',          [AiPredictionController::class, 'index'])->name('ai.index');
+    });
+
+    // ── Normal user: read-only access to properties and leases ───────────
+    // Registered AFTER the admin|manager resource routes so that wildcard
+    // {property} and {lease} segments don't shadow the /create paths above.
+    Route::middleware('role:admin|manager|user')->group(function () {
+        Route::get('properties',             [PropertyController::class, 'index'])->name('properties.index');
+        Route::get('properties/{property}',  [PropertyController::class, 'show'])->name('properties.show');
+        Route::get('leases',                 [LeaseController::class, 'index'])->name('leases.index');
+        Route::get('leases/{lease}',         [LeaseController::class, 'show'])->name('leases.show');
     });
 
     // ── Admin + Manager + Staff ───────────────────────────────────────────

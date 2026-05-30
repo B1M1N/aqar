@@ -15,7 +15,19 @@ class PropertyController extends Controller
 {
     public function index(Request $request): View
     {
+        // [role:user] scope to properties the user is renting via their tenant record
+        $tenantId = null;
+        if (auth()->user()->hasRole('user')) {
+            $tenantId = auth()->user()->tenant?->id;
+        }
+
         $properties = Property::query()
+            ->when($tenantId, fn ($q) =>
+                $q->whereHas('units.leases', fn ($l) => $l->where('tenant_id', $tenantId))
+            )
+            ->when($tenantId === null && auth()->user()->hasRole('user'), fn ($q) =>
+                $q->whereRaw('0 = 1')
+            )
             ->when($request->search, fn ($q) =>
                 $q->where('name', 'like', "%{$request->search}%")
                   ->orWhere('city', 'like', "%{$request->search}%")
@@ -59,6 +71,17 @@ class PropertyController extends Controller
 
     public function show(Property $property): View
     {
+        // [role:user] allow access only to properties they are renting
+        if (auth()->user()->hasRole('user')) {
+            $tenantId = auth()->user()->tenant?->id;
+            $hasAccess = $tenantId && $property->units()
+                ->whereHas('leases', fn ($q) => $q->where('tenant_id', $tenantId))
+                ->exists();
+            if (! $hasAccess) {
+                return redirect()->route('leases.index');
+            }
+        }
+
         $property->load(['owner', 'units.activeLease.tenant']);
 
         $maintenanceCount = MaintenanceRequest::whereIn(

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -33,13 +34,20 @@ class RegisterController extends Controller
             'password.confirmed' => 'تأكيد كلمة المرور غير متطابق.',
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'phone' => $validated['phone'] ?? null,
             'password' => Hash::make($validated['password']),
             'preferred_language' => 'ar',
         ]);
+
+        $user->assignRole('user');
+
+        // [role:user] auto-link to an existing Tenant record with the same email
+        Tenant::where('email', $validated['email'])
+            ->whereNull('user_id')
+            ->update(['user_id' => $user->id]);
 
         return redirect()->route('login')->with('status', 'تم إنشاء الحساب بنجاح. يمكنك الآن تسجيل الدخول.');
     }

@@ -19,7 +19,17 @@ class LeaseController extends Controller
 
     public function index(Request $request): View
     {
+        // [role:user] scope to leases belonging to the user's linked tenant record
+        $tenantId = null;
+        if (auth()->user()->hasRole('user')) {
+            $tenantId = auth()->user()->tenant?->id;
+        }
+
         $leases = Lease::query()
+            ->when($tenantId,   fn ($q) => $q->where('tenant_id', $tenantId))
+            ->when($tenantId === null && auth()->user()->hasRole('user'), fn ($q) =>
+                $q->whereRaw('0 = 1')
+            )
             ->when($request->search, fn ($q) =>
                 $q->whereHas('tenant', fn ($t) => $t->where('name', 'like', "%{$request->search}%"))
                   ->orWhereHas('unit', fn ($u) => $u->where('unit_number', 'like', "%{$request->search}%"))
@@ -55,6 +65,14 @@ class LeaseController extends Controller
     public function show(Lease $lease): View
     {
         $lease->load(['unit.property', 'tenant', 'renewals', 'invoices' => fn ($q) => $q->latest()]);
+
+        // [role:user] allow access only to their own lease via linked tenant record
+        if (auth()->user()->hasRole('user')) {
+            $tenantId = auth()->user()->tenant?->id;
+            if (! $tenantId || $lease->tenant_id !== $tenantId) {
+                return redirect()->route('leases.index');
+            }
+        }
 
         return view('leases.show', compact('lease'));
     }

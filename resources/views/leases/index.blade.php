@@ -78,10 +78,14 @@ $statusLabel = ['active' => 'نشط', 'pending' => 'معلق', 'expired' => 'م�
                     <tr class="hover:bg-gray-50 transition">
                         <td class="font-medium text-gray-800">{{ $lease->tenant->name ?? '—' }}</td>
                         <td>
+                            @can('units.view')
                             <a href="{{ route('units.show', $lease->unit) }}"
                                class="text-indigo-600 hover:text-indigo-700 font-medium">
                                 {{ $lease->unit->unit_number }}
                             </a>
+                            @else
+                            <span class="font-medium text-gray-700">{{ $lease->unit->unit_number }}</span>
+                            @endcan
                         </td>
                         <td class="text-gray-500 text-sm">{{ $lease->unit->property->name }}</td>
                         <td class="text-gray-500">{{ $lease->start_date->format('Y/m/d') }}</td>

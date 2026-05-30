@@ -181,7 +181,9 @@
                             {{ optional(optional($unit->activeLease)->tenant)->name ?? '—' }}
                         </td>
                         <td>
+                            @can('units.view')
                             <a href="{{ route('units.show', $unit) }}" class="text-indigo-600 hover:text-indigo-700 text-sm font-medium">عرض</a>
+                            @endcan
                         </td>
                     </tr>
                     @endforeach

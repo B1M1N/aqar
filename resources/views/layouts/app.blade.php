@@ -31,6 +31,7 @@
         {{-- Nav --}}
         <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
 
+            @hasanyrole('admin|manager|staff')
             <a href="{{ route('dashboard') }}"
                class="sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -39,6 +40,7 @@
                 </svg>
                 لوحة التحكم
             </a>
+            @endhasanyrole
 
             @canany(['properties.view'])
             <a href="{{ route('properties.index') }}"
@@ -129,6 +131,7 @@
             </a>
             @endcanany
 
+            @hasanyrole('admin|manager|staff')
             <a href="{{ route('notifications.index') }}"
                class="sidebar-link {{ request()->routeIs('notifications.*') ? 'active' : '' }}">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -143,6 +146,7 @@
                     </span>
                 @endif
             </a>
+            @endhasanyrole
 
             @canany(['settings.view'])
             <a href="{{ route('settings.index') }}"
@@ -215,6 +219,7 @@
 
             <div class="flex items-center gap-3">
                 {{-- Notifications bell --}}
+                @hasanyrole('admin|manager|staff')
                 <a href="{{ route('notifications.index') }}"
                    class="relative rounded-xl p-2 text-gray-500 hover:bg-gray-100 transition">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -225,6 +230,7 @@
                     <span class="absolute top-1 start-1 flex h-2 w-2 rounded-full bg-red-500"></span>
                     @endif
                 </a>
+                @endhasanyrole
             </div>
         </header>
 

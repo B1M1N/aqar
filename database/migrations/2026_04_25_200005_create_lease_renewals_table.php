@@ -8,15 +8,17 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('lease_renewals', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('lease_id')->constrained('leases')->cascadeOnDelete();
-            $table->date('old_end_date');
-            $table->date('new_end_date');
-            $table->decimal('new_rent_amount', 10, 2);
-            $table->foreignId('renewed_by')->constrained('users')->cascadeOnDelete();
-            $table->timestamps();
-        });
+        if (! Schema::hasTable('lease_renewals')) {
+            Schema::create('lease_renewals', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('lease_id')->constrained('leases')->cascadeOnDelete();
+                $table->date('old_end_date');
+                $table->date('new_end_date');
+                $table->decimal('new_rent_amount', 10, 2);
+                $table->foreignId('renewed_by')->constrained('users')->cascadeOnDelete();
+                $table->timestamps();
+            });
+        }
     }
 
     public function down(): void
