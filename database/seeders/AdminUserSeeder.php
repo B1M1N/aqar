@@ -11,6 +11,8 @@ class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->call(RoleAndPermissionSeeder::class);
+
         $users = [
             [
                 'name'               => 'مدير النظام',
