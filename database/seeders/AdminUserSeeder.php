@@ -69,7 +69,7 @@ class AdminUserSeeder extends Seeder
         }
 
         // [role:user] create a linked Tenant record for the test user account
-        $testUser = User::where('email', 'user@aqari.com')->first();
+        $testUser = User::whereEmail('user@aqari.com')->first();
         if ($testUser) {
             Tenant::updateOrCreate(
                 ['national_id' => 'TEST-00005'],
